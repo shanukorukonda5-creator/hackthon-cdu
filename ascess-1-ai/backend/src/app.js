@@ -44,6 +44,18 @@ app.use(cookieParser());
 // Static uploads directory
 app.use('/uploads', express.static(path.join(process.cwd(), 'src', 'uploads')));
 
+// Welcome Root Route
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'ascess-1-ai Enterprise Accessibility Engine API Service',
+    version: '1.0.0',
+    status: 'online',
+    health: '/health',
+    api: '/api',
+  });
+});
+
 // Health Check Route for Render
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'ascess-1-ai backend', timestamp: new Date() });
