@@ -1,13 +1,26 @@
 export const speakText = (text, rate = 1.0, pitch = 1.0) => {
-  if (!('speechSynthesis' in window)) {
-    console.warn('Text-to-speech not supported in this browser environment.');
+  if (!('speechSynthesis' in window) || !text) {
+    console.warn('Text-to-speech not supported in this browser environment or empty text.');
     return;
   }
-  window.speechSynthesis.cancel(); // Stop current speech
+  try {
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.resume();
+  } catch (e) {
+    // ignore
+  }
+
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = rate;
   utterance.pitch = pitch;
-  window.speechSynthesis.speak(utterance);
+
+  setTimeout(() => {
+    try {
+      window.speechSynthesis.speak(utterance);
+    } catch (err) {
+      console.warn('speechSynthesis.speak error:', err);
+    }
+  }, 50);
 };
 
 export const stopSpeech = () => {

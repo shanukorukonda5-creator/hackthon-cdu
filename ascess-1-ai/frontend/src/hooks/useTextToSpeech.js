@@ -31,18 +31,24 @@ export const useTextToSpeech = (initialText = '') => {
   }, []);
 
   const speak = (customText) => {
-    const textToSpeak = customText || text;
+    const textToSpeak = (typeof customText === 'string' && customText.trim()) ? customText : text;
     if (!textToSpeak || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
-    window.speechSynthesis.cancel();
+    try {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+    } catch (e) {
+      // ignore
+    }
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.rate = rate;
-    utterance.pitch = pitch;
-    utterance.volume = volume;
+    utterance.rate = rate || 1.0;
+    utterance.pitch = pitch || 1.0;
+    utterance.volume = volume || 1.0;
 
-    if (selectedVoice) {
-      const vObj = voices.find((v) => v.name === selectedVoice);
+    const availableVoices = voices.length > 0 ? voices : (typeof window !== 'undefined' && 'speechSynthesis' in window ? window.speechSynthesis.getVoices() : []);
+    if (selectedVoice && availableVoices.length > 0) {
+      const vObj = availableVoices.find((v) => v.name === selectedVoice);
       if (vObj) utterance.voice = vObj;
     }
 
@@ -59,7 +65,8 @@ export const useTextToSpeech = (initialText = '') => {
       setCurrentSentence('');
     };
 
-    utterance.onerror = () => {
+    utterance.onerror = (err) => {
+      console.warn('SpeechSynthesis error:', err);
       setIsPlaying(false);
       setIsPaused(false);
     };
@@ -78,7 +85,13 @@ export const useTextToSpeech = (initialText = '') => {
     };
 
     utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    setTimeout(() => {
+      try {
+        window.speechSynthesis.speak(utterance);
+      } catch (err) {
+        console.warn('Failed to start speechSynthesis speak:', err);
+      }
+    }, 50);
   };
 
   const pause = () => {
