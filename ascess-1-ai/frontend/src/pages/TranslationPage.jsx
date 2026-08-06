@@ -68,7 +68,7 @@ const TranslationPage = () => {
           <FiGlobe className="text-purple-400" />
           <span>AI Multi-Language Translation Studio</span>
         </h1>
-        <p className="text-slate-400 text-sm mt-1">Translate content across 14 languages using Google Gemini while preserving markdown, headings, and lists.</p>
+        <p className="text-slate-400 text-sm mt-1">Translate content across 14 languages using OpenAI while preserving markdown, headings, and lists.</p>
       </div>
 
       {/* Language Pickers & Swap Bar */}

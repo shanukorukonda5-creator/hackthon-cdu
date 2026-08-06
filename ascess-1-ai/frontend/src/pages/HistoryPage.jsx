@@ -42,7 +42,7 @@ const dummyHistoryRecords = [
   },
   {
     id: '4',
-    title: 'Gemini_Multimodal_Prompt_Session_04.json',
+    title: 'OpenAI_Multimodal_Prompt_Session_04.json',
     type: 'AI Prompt',
     score: 98,
     date: '2026-08-03',

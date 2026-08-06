@@ -23,7 +23,7 @@ const LandingPage = () => {
         </h1>
 
         <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-3xl leading-relaxed">
-          <span className="text-indigo-400 font-semibold">ascess-1-ai</span> delivers production-grade accessibility auditing, real-time OCR document processing, multimodal speech interaction, and Google Gemini AI intelligence in a unified Apple-inspired experience.
+          <span className="text-indigo-400 font-semibold">ascess-1-ai</span> delivers production-grade accessibility auditing, real-time OCR document processing, multimodal speech interaction, and OpenAI intelligence in a unified Apple-inspired experience.
         </p>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">
@@ -57,7 +57,7 @@ const LandingPage = () => {
             <div className="w-12 h-12 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl mb-4">
               <FiCpu />
             </div>
-            <h3 className="text-xl font-bold text-slate-100 mb-2">Gemini AI Integration</h3>
+            <h3 className="text-xl font-bold text-slate-100 mb-2">OpenAI Integration</h3>
             <p className="text-sm text-slate-400 leading-relaxed">
               Multimodal document insight generation, prompt processing, and contextual assistance.
             </p>

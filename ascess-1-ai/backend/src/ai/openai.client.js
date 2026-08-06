@@ -4,13 +4,17 @@ import { logger } from '../utils/logger.js';
 
 let openaiClient = null;
 
-const key = config.openai.apiKey || config.gemini.apiKey || '';
-const isValidKeyFormat = key.length > 15 && !key.includes('your-openai-api-key');
+const key = config.openai.apiKey || '';
+const baseUrl = config.openai.baseUrl || 'https://api.openai.com/v1';
+const isValidKeyFormat = key.length > 10 && !key.includes('your-openai-api-key');
 
 if (isValidKeyFormat) {
   try {
-    openaiClient = new OpenAI({ apiKey: key });
-    logger.info('OpenAI SDK client initialized with provided API key.');
+    openaiClient = new OpenAI({
+      apiKey: key,
+      baseURL: baseUrl,
+    });
+    logger.info('OpenAI SDK client initialized successfully.');
   } catch (err) {
     logger.error('Failed to initialize OpenAI SDK:', err.message);
   }
@@ -23,7 +27,7 @@ const cache = new Map();
 const CACHE_MAX_SIZE = 100;
 
 export const generateContent = async (prompt, options = {}) => {
-  const modelName = options.model || 'gpt-4o-mini';
+  const modelName = options.model || config.openai.model || 'gpt-5-mini';
   const cacheKey = `${modelName}:${prompt}`;
 
   if (cache.has(cacheKey)) {
@@ -49,17 +53,27 @@ export const generateContent = async (prompt, options = {}) => {
   while (attempts < maxAttempts) {
     try {
       attempts++;
-      const completion = await openaiClient.chat.completions.create({
-        model: modelName,
-        messages: [
-          { role: 'system', content: 'You are ascess-1-ai, an enterprise accessibility and AI tutoring assistant.' },
-          { role: 'user', content: prompt },
-        ],
-        temperature: options.temperature ?? 0.7,
-        max_tokens: options.maxTokens ?? 2000,
-      });
+      let text = '';
 
-      const text = completion.choices[0]?.message?.content || '';
+      // Try OpenAI Responses API (or Chat Completions fallback)
+      if (typeof openaiClient.responses?.create === 'function') {
+        const response = await openaiClient.responses.create({
+          model: modelName,
+          input: prompt,
+        });
+        text = response.output_text || response.output?.[0]?.text || '';
+      } else {
+        const completion = await openaiClient.chat.completions.create({
+          model: modelName,
+          messages: [
+            { role: 'system', content: 'You are ascess-1-ai, an enterprise accessibility and AI tutoring assistant.' },
+            { role: 'user', content: prompt },
+          ],
+          temperature: options.temperature ?? 0.7,
+          max_tokens: options.maxTokens ?? 2000,
+        });
+        text = completion.choices[0]?.message?.content || '';
+      }
 
       const output = {
         text,
@@ -84,8 +98,8 @@ export const generateContent = async (prompt, options = {}) => {
         err.message?.includes('invalid_api_key') ||
         err.message?.includes('401')
       ) {
-        logger.warn('OpenAI API quota/key notice detected. Utilizing fallback AI response engine.');
-        return getFallbackResponse('OpenAI API Notice (Rate limit or invalid key)');
+        logger.warn('OpenAI API notice detected. Utilizing fallback AI response engine.');
+        return getFallbackResponse('OpenAI API Notice (Rate limit or API key check)');
       }
 
       if (attempts >= maxAttempts) {
@@ -96,7 +110,7 @@ export const generateContent = async (prompt, options = {}) => {
   }
 };
 
-export const parseGeminiJson = (rawText) => {
+export const parseOpenAiJson = (rawText) => {
   if (!rawText) return null;
   try {
     const cleaned = rawText
@@ -109,4 +123,6 @@ export const parseGeminiJson = (rawText) => {
   }
 };
 
-export default { generateContent, parseGeminiJson };
+export const parseGeminiJson = parseOpenAiJson;
+
+export default { generateContent, parseOpenAiJson, parseGeminiJson };

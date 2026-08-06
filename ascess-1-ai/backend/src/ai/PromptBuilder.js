@@ -1,5 +1,5 @@
 /**
- * PromptBuilder module for Google Gemini AI Accessibility Engine.
+ * PromptBuilder module for OpenAI Accessibility Engine.
  * Formats structured system instructions and forces clean JSON output schemas.
  */
 export const PromptBuilder = {

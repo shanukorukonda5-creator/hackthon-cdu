@@ -6,7 +6,7 @@ const AiChatWindow = ({ messages = [] }) => {
     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
       {messages.length === 0 ? (
         <div className="text-center py-12 text-slate-500">
-          <p className="font-semibold text-base text-slate-400">Google Gemini AI Engine Ready</p>
+          <p className="font-semibold text-base text-slate-400">OpenAI Engine Ready</p>
           <p className="text-xs mt-1">Ask any question or request document analysis to begin.</p>
         </div>
       ) : (

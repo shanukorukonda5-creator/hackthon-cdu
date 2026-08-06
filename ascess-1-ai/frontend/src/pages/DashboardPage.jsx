@@ -34,9 +34,9 @@ const dummyRecentDocs = [
 ];
 
 const dummyRecentAi = [
-  { prompt: 'Summarize WCAG 2.1 AA Contrast Ratios', model: 'Gemini-1.5-Flash', time: '15 mins ago' },
-  { prompt: 'Generate Alt Text for Hero Banner Image', model: 'Gemini-1.5-Flash', time: '2 hours ago' },
-  { prompt: 'Check ARIA Landmark structure for Navigation', model: 'Gemini-1.5-Pro', time: '5 hours ago' },
+  { prompt: 'Summarize WCAG 2.1 AA Contrast Ratios', model: 'gpt-5-mini', time: '15 mins ago' },
+  { prompt: 'Generate Alt Text for Hero Banner Image', model: 'gpt-5-mini', time: '2 hours ago' },
+  { prompt: 'Check ARIA Landmark structure for Navigation', model: 'gpt-5-mini', time: '5 hours ago' },
 ];
 
 const DashboardPage = () => {
@@ -57,7 +57,7 @@ const DashboardPage = () => {
           </h1>
 
           <p className="mt-2 text-sm text-slate-300 leading-relaxed">
-            Your centralized intelligence suite for automated WCAG auditing, OCR document processing, voice synthesis, multi-language translation, and Google Gemini AI insights.
+            Your centralized intelligence suite for automated WCAG auditing, OCR document processing, voice synthesis, multi-language translation, and OpenAI insights.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -208,7 +208,7 @@ const DashboardPage = () => {
           <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl mb-3">
             <FiCpu />
           </div>
-          <h4 className="text-sm font-bold text-slate-100 mb-1">Google Gemini Intelligence</h4>
+          <h4 className="text-sm font-bold text-slate-100 mb-1">OpenAI Intelligence</h4>
           <p className="text-xs text-slate-400 leading-relaxed">
             Multimodal reasoning, text summarization, and accessibility improvement suggestions.
           </p>

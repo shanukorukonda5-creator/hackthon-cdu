@@ -24,7 +24,7 @@ export const NotificationProvider = ({ children }) => {
     },
     {
       id: '3',
-      title: 'New Gemini AI Engine Active',
+      title: 'New OpenAI Engine Active',
       message: 'Multimodal prompt generation engine initialized.',
       type: 'info',
       timestamp: '2 hours ago',

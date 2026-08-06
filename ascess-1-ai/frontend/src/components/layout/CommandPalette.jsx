@@ -16,7 +16,7 @@ import {
 
 const commandItems = [
   { name: 'Dashboard Overview', path: '/dashboard', icon: FiGrid, category: 'Navigation' },
-  { name: 'Gemini AI Assistant', path: '/ai', icon: FiCpu, category: 'AI Tools' },
+  { name: 'OpenAI Assistant', path: '/ai', icon: FiCpu, category: 'AI Tools' },
   { name: 'Upload & Process Documents', path: '/upload', icon: FiUploadCloud, category: 'Tools' },
   { name: 'Accessibility Reports', path: '/accessibility', icon: FiEye, category: 'Audit' },
   { name: 'Multi-Language Translation', path: '/translation', icon: FiGlobe, category: 'Tools' },

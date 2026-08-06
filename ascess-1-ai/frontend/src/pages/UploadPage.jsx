@@ -148,7 +148,7 @@ const UploadPage = () => {
     try {
       const res = await aiService.summarizeDocument(doc.extracted_text || doc.title);
       setAiResult({ type: 'summary', data: res.data });
-      addToast('Document summarized with Gemini AI!', 'success');
+      addToast('Document summarized with OpenAI!', 'success');
     } catch (err) {
       addToast(err.message || 'Summarization failed.', 'error');
     } finally {
@@ -434,7 +434,7 @@ const UploadPage = () => {
             <div className="flex items-center space-x-2">
               <FiCpu className="text-indigo-400 text-lg" />
               <h3 className="text-sm font-bold text-slate-100">
-                Gemini AI Result for "{selectedDoc.title}"
+                OpenAI Result for "{selectedDoc.title}"
               </h3>
             </div>
             <button onClick={() => setAiResult(null)} className="text-xs text-slate-400 hover:text-white">

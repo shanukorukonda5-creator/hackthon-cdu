@@ -20,7 +20,7 @@ const PromptInput = ({ onSubmit, loading }) => {
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Ask Gemini AI or request accessibility analysis..."
+          placeholder="Ask OpenAI or request accessibility analysis..."
           className="glass-input w-full rounded-2xl py-3.5 pl-4 pr-12 text-sm bg-slate-900/80 border border-white/15 focus:border-indigo-500 shadow-xl"
         />
       </div>

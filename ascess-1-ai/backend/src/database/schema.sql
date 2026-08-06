@@ -79,7 +79,7 @@ CREATE TABLE ai_history (
     session_id UUID DEFAULT uuid_generate_v4(),
     prompt TEXT NOT NULL,
     response TEXT NOT NULL,
-    model_used VARCHAR(100) DEFAULT 'gemini-1.5-flash',
+    model_used VARCHAR(100) DEFAULT 'gpt-5-mini',
     tokens_used INT DEFAULT 0,
     metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,

@@ -1,30 +1,29 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import GlassCard from '../components/ui/GlassCard';
 import GlassButton from '../components/ui/GlassButton';
 import TextToSpeech from '../components/accessibility/TextToSpeech';
 import SpeechToText from '../components/accessibility/SpeechToText';
-import Badge from '../components/ui/Badge';
 import { useNotifications } from '../context/NotificationContext';
 import aiService from '../services/ai.service';
 import {
   FiCpu,
   FiSend,
-  FiPaperclip,
   FiPlus,
-  FiMessageSquare,
-  FiZap,
-  FiCopy,
-  FiRefreshCw,
   FiTrash2,
+  FiPaperclip,
+  FiCopy,
   FiFileText,
   FiX,
+  FiZap,
+  FiRefreshCw,
+  FiMessageSquare,
 } from 'react-icons/fi';
 
 const suggestedPrompts = [
-  'Audit WCAG 2.1 AA Contrast Rules',
-  'Generate ARIA Labels for Navbar',
-  'Summarize Document Accessibility',
-  'Check Keyboard Traps in Modal',
+  'Audit current document for WCAG AA compliance',
+  'Simplify this text for a 5th grade reading level',
+  'Generate accessible alt text for complex UI diagrams',
+  'Translate document content into Telugu & Spanish',
 ];
 
 const AiPage = () => {
@@ -33,7 +32,7 @@ const AiPage = () => {
     {
       role: 'assistant',
       content:
-        'Hello! I am your Google Gemini AI Accessibility Copilot. Ask any question or provide a document for accessibility guidance, WCAG auditing, or text simplification.',
+        'Hello! I am your OpenAI Accessibility Copilot. Ask any question or provide a document for accessibility guidance, WCAG auditing, or text simplification.',
     },
   ]);
   const [prompt, setPrompt] = useState('');
@@ -87,7 +86,7 @@ const AiPage = () => {
         : '';
 
       const response = await aiService.chat(apiMessages, docContextStr);
-      const assistantContent = response.data?.content || 'Response received from Gemini AI.';
+      const assistantContent = response.data?.content || 'Response received from OpenAI.';
 
       setMessages((prev) => [
         ...prev,
@@ -103,7 +102,7 @@ const AiPage = () => {
         ...prev,
         {
           role: 'assistant',
-          content: '⚠️ An error occurred while contacting the Gemini AI engine. Please check your backend connection or try again.',
+          content: '⚠️ An error occurred while contacting the OpenAI engine. Please check your backend connection or try again.',
         },
       ]);
     } finally {
@@ -173,8 +172,8 @@ const AiPage = () => {
               <FiCpu />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-100">Gemini AI Accessibility Copilot</h3>
-              <p className="text-[10px] text-indigo-400 font-mono">Live Gemini Engine Connected</p>
+              <h3 className="text-sm font-bold text-slate-100">OpenAI Accessibility Copilot</h3>
+              <p className="text-[10px] text-indigo-400 font-mono">Live OpenAI Engine Connected</p>
             </div>
           </div>
 
@@ -231,7 +230,7 @@ const AiPage = () => {
           {isThinking && (
             <div className="flex items-center space-x-3 p-3 rounded-xl glass-panel border border-white/10 w-fit animate-pulse">
               <FiCpu className="text-indigo-400 text-base animate-spin" />
-              <span className="text-xs text-slate-300 font-medium">Gemini AI is processing your request...</span>
+              <span className="text-xs text-slate-300 font-medium">OpenAI is processing your request...</span>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -274,7 +273,7 @@ const AiPage = () => {
             type="text"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Ask Gemini AI or request accessibility assistance..."
+            placeholder="Ask OpenAI or request accessibility assistance..."
             className="glass-input flex-1 rounded-2xl py-3 px-4 text-sm bg-slate-900/80 border border-white/15"
           />
 
