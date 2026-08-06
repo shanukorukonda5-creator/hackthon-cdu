@@ -124,3 +124,6 @@ html.light select {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(99, 102, 241, 0.8);
 }
+
+/* Production CSS styles synced for Vercel deployment */
+
