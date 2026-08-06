@@ -34,7 +34,8 @@ export const db = {
         if (options.orderBy) query = query.order(options.orderBy, { ascending: options.ascending ?? false });
         if (options.limit) query = query.limit(options.limit);
         const { data, error } = await query;
-        if (!error) return data;
+        if (!error && data) return data;
+        if (error) console.warn(`[Supabase] Query error on table ${table}:`, error.message);
       } catch (err) {
         console.warn(`[Supabase] Network query failed for table ${table}. Using fallback store.`);
       }
@@ -56,8 +57,9 @@ export const db = {
           .match(match)
           .single();
 
-        if (!error) return data;
-        if (error && error.code === 'PGRST116') return null; // No rows
+        if (!error && data) return data;
+        if (error && error.code === 'PGRST116') return null; // No rows found
+        if (error) console.warn(`[Supabase] Query error on table ${table}:`, error.message);
       } catch (err) {
         console.warn(`[Supabase] Network query failed for table ${table}. Using fallback store.`);
       }
@@ -89,7 +91,8 @@ export const db = {
           .insert(preparedItems)
           .select();
 
-        if (!error && data) return isArray ? data : data[0];
+        if (!error && data && data.length > 0) return isArray ? data : data[0];
+        if (error) console.warn(`[Supabase] Insert error on table ${table}:`, error.message);
       } catch (err) {
         console.warn(`[Supabase] Network insert failed for table ${table}. Using fallback store.`);
       }
@@ -110,7 +113,8 @@ export const db = {
           .match(match)
           .select();
 
-        if (!error) return data;
+        if (!error && data) return data;
+        if (error) console.warn(`[Supabase] Update error on table ${table}:`, error.message);
       } catch (err) {
         console.warn(`[Supabase] Network update failed for table ${table}. Using fallback store.`);
       }
@@ -140,7 +144,8 @@ export const db = {
           .match(match)
           .select();
 
-        if (!error) return data;
+        if (!error && data) return data;
+        if (error) console.warn(`[Supabase] Delete error on table ${table}:`, error.message);
       } catch (err) {
         console.warn(`[Supabase] Network delete failed for table ${table}. Using fallback store.`);
       }
