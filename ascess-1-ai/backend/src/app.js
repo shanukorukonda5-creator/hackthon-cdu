@@ -61,6 +61,21 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'ascess-1-ai backend', timestamp: new Date() });
 });
 
+// Auto-prefix non-/api requests for auth, ai, documents, accessibility, user
+app.use((req, res, next) => {
+  if (
+    !req.path.startsWith('/api') &&
+    (req.path.startsWith('/auth') ||
+      req.path.startsWith('/ai') ||
+      req.path.startsWith('/documents') ||
+      req.path.startsWith('/accessibility') ||
+      req.path.startsWith('/user'))
+  ) {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // API Routes
 app.use('/api', apiRoutes);
 
