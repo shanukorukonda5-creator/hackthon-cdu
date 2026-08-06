@@ -52,7 +52,8 @@ const UploadPage = () => {
   const fetchDocuments = async () => {
     try {
       const res = await documentService.getDocuments();
-      if (res.data) setDocuments(res.data);
+      const docs = res.data || (Array.isArray(res) ? res : []);
+      if (docs && Array.isArray(docs)) setDocuments(docs);
     } catch (err) {
       // Fallback local initial state if offline
     }
@@ -68,7 +69,13 @@ const UploadPage = () => {
     try {
       const file = files[0];
       const res = await documentService.uploadFile(file);
+      const newDoc = res.data || res;
       setProgress(100);
+
+      if (newDoc && newDoc.title) {
+        setDocuments((prev) => [newDoc, ...prev.filter((d) => d.id !== newDoc.id)]);
+      }
+
       addToast(`Uploaded and processed "${file.name}"`, 'success');
       fetchDocuments();
     } catch (err) {
@@ -85,7 +92,11 @@ const UploadPage = () => {
 
     setIsUploading(true);
     try {
-      await documentService.processUrl(targetUrl);
+      const res = await documentService.processUrl(targetUrl);
+      const newDoc = res.data || res;
+      if (newDoc && newDoc.title) {
+        setDocuments((prev) => [newDoc, ...prev.filter((d) => d.id !== newDoc.id)]);
+      }
       addToast('Website URL content scraped successfully!', 'success');
       setTargetUrl('');
       fetchDocuments();
@@ -102,7 +113,11 @@ const UploadPage = () => {
 
     setIsUploading(true);
     try {
-      await documentService.processText(pastedText, pastedTitle || 'Pasted Content');
+      const res = await documentService.processText(pastedText, pastedTitle || 'Pasted Content');
+      const newDoc = res.data || res;
+      if (newDoc && newDoc.title) {
+        setDocuments((prev) => [newDoc, ...prev.filter((d) => d.id !== newDoc.id)]);
+      }
       addToast('Text document saved and processed!', 'success');
       setPastedText('');
       setPastedTitle('');
@@ -138,7 +153,7 @@ const UploadPage = () => {
   // Quick Action Handlers
   const handleOpenAiChat = (doc) => {
     sessionStorage.setItem('activeDocumentContext', JSON.stringify(doc));
-    addToast(`Loaded document context for AI Chat: "${doc.title}"`, 'info');
+    addToast(`Attached "${doc.title}" context to OpenAI Assistant`, 'info');
     navigate('/ai');
   };
 
@@ -277,9 +292,8 @@ const UploadPage = () => {
       {activeTab === 'url' && (
         <GlassCard>
           <form onSubmit={handleUrlScan} className="space-y-4">
-            <h3 className="text-base font-bold text-slate-200">Scrape Website Content</h3>
             <InputField
-              label="Target Web Page URL"
+              label="Website or Article URL"
               type="url"
               placeholder="https://example.com/article"
               value={targetUrl}
@@ -288,174 +302,195 @@ const UploadPage = () => {
             />
             <div className="flex justify-end">
               <GlassButton type="submit" variant="primary" loading={isUploading} disabled={!targetUrl.trim()}>
-                Run Website Scraper
+                Scrape & Extract Website Content
               </GlassButton>
             </div>
           </form>
         </GlassCard>
       )}
 
-      {/* Tab 3: Paste Text */}
+      {/* Tab 3: Raw Text Input */}
       {activeTab === 'text' && (
         <GlassCard>
           <form onSubmit={handleTextUpload} className="space-y-4">
-            <h3 className="text-base font-bold text-slate-200">Ingest Plain Text / Markdown</h3>
             <InputField
-              label="Document Title (Optional)"
+              label="Document Title"
               type="text"
-              placeholder="e.g. WCAG Guidelines Summary"
+              placeholder="e.g. Accessibility Guidelines Summary"
               value={pastedTitle}
               onChange={(e) => setPastedTitle(e.target.value)}
+              icon={FiFileText}
             />
-            <textarea
-              rows={7}
-              value={pastedText}
-              onChange={(e) => setPastedText(e.target.value)}
-              placeholder="Paste raw text or Markdown here..."
-              className="glass-input w-full rounded-2xl p-4 text-sm bg-slate-900/60 border border-white/10"
-            />
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">Raw Text / Markdown Content</label>
+              <textarea
+                rows={6}
+                value={pastedText}
+                onChange={(e) => setPastedText(e.target.value)}
+                placeholder="Paste text here for instant extraction and AI accessibility binding..."
+                className="glass-input w-full rounded-2xl p-4 text-sm bg-slate-900/60 border border-white/10"
+              />
+            </div>
             <div className="flex justify-end">
               <GlassButton type="submit" variant="primary" loading={isUploading} disabled={!pastedText.trim()}>
-                Save Text Document
+                Save & Bind Text Document
               </GlassButton>
             </div>
           </form>
         </GlassCard>
       )}
 
-      {/* Document Storage Vault Section */}
+      {/* Processed Document Vault Header & Filters */}
       <div className="space-y-4 pt-4 border-t border-white/10">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h2 className="text-xl font-bold text-slate-100">Processed Document Vault</h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-slate-100 flex items-center space-x-2">
+              <FiFileText className="text-indigo-400" />
+              <span>Processed Document Vault</span>
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">Manage uploaded files, attached context, and quick AI actions.</p>
+          </div>
 
-          <div className="w-full sm:w-72">
-            <InputField
-              type="text"
-              placeholder="Search documents..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              icon={FiSearch}
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" />
+              <input
+                type="text"
+                placeholder="Search documents..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="glass-input w-full rounded-xl pl-9 pr-3 py-1.5 text-xs bg-slate-900/80 border border-white/10"
+              />
+            </div>
+
+            <SelectField
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              options={[
+                { value: 'all', label: 'All Files' },
+                { value: 'pdf', label: 'PDFs Only' },
+                { value: 'image', label: 'Images Only' },
+                { value: 'url', label: 'URLs Only' },
+                { value: 'text', label: 'Text Files' },
+                { value: 'favorites', label: '★ Favorites' },
+              ]}
+              className="w-36 text-xs"
             />
           </div>
         </div>
 
-        {/* Filter Categories Tabs */}
-        <Tabs
-          activeTab={filterType}
-          onChange={setFilterType}
-          tabs={[
-            { id: 'all', label: 'All Documents' },
-            { id: 'favorites', label: 'Favorites ★' },
-            { id: 'pdf', label: 'PDFs' },
-            { id: 'image', label: 'Images' },
-            { id: 'url', label: 'Web Scrapes' },
-            { id: 'text', label: 'Text' },
-          ]}
-        />
-
-        {/* Document Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredDocs.length === 0 ? (
-            <GlassCard className="col-span-2 text-center py-12 text-slate-500">
-              <p>No documents found matching current filter.</p>
-            </GlassCard>
-          ) : (
-            filteredDocs.map((doc) => {
-              const meta = doc.metadata || {};
-              const isFav = meta.favorite;
-              return (
-                <GlassCard key={doc.id} className="flex flex-col justify-between space-y-4 p-5 border border-white/10">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3 overflow-hidden">
-                      <div className="p-3 rounded-xl bg-indigo-600/20 text-indigo-400 text-xl flex-shrink-0">
-                        <FiFileText />
-                      </div>
-                      <div className="overflow-hidden">
-                        <h4 className="text-sm font-bold text-slate-100 truncate">{doc.title || doc.file_name}</h4>
-                        <div className="flex items-center space-x-2 text-[10px] text-slate-400 mt-1">
-                          <Badge variant="info">{doc.file_type?.toUpperCase()}</Badge>
-                          <span>•</span>
-                          <span>{meta.readingTime || '1 min read'}</span>
-                          <span>•</span>
-                          <span>{meta.wordCount || 0} words</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={() => handleToggleFavorite(doc.id)}
-                      className={`p-2 rounded-xl transition-colors ${
-                        isFav ? 'text-amber-400 bg-amber-500/10' : 'text-slate-500 hover:text-slate-200'
-                      }`}
-                      title="Favorite"
-                    >
-                      <FiStar className="text-base" />
-                    </button>
-                  </div>
-
-                  {/* Preview snippet */}
-                  <p className="text-xs text-slate-300 line-clamp-2 bg-slate-900/40 p-2.5 rounded-xl border border-white/5 font-mono">
-                    {doc.extracted_text || 'Text content extracted and indexed for AI reasoning.'}
-                  </p>
-
-                  {/* Quick Actions Bar */}
-                  <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center space-x-1">
-                      <GlassButton size="xs" variant="primary" onClick={() => handleOpenAiChat(doc)}>
-                        <FiMessageSquare className="mr-1" /> AI Chat
-                      </GlassButton>
-                      <GlassButton size="xs" variant="secondary" onClick={() => handleSummarize(doc)}>
-                        <FiZap className="mr-1" /> Summarize
-                      </GlassButton>
-                      <GlassButton size="xs" variant="secondary" onClick={() => handleSimplify(doc)}>
-                        <FiCheckCircle className="mr-1" /> Simplify
-                      </GlassButton>
-                    </div>
-
-                    <button
-                      onClick={() => handleDelete(doc.id)}
-                      className="p-1.5 text-slate-500 hover:text-rose-400 transition-colors"
-                      title="Delete Document"
-                    >
-                      <FiTrash2 className="text-sm" />
-                    </button>
-                  </div>
-                </GlassCard>
-              );
-            })
-          )}
-        </div>
-      </div>
-
-      {/* AI Processing Modal Output Result */}
-      {aiResult && selectedDoc && (
-        <GlassCard className="space-y-4 border-indigo-500/40 bg-indigo-950/20">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <div className="flex items-center space-x-2">
-              <FiCpu className="text-indigo-400 text-lg" />
-              <h3 className="text-sm font-bold text-slate-100">
-                OpenAI Result for "{selectedDoc.title}"
-              </h3>
+        {/* AI Result Card Display */}
+        {aiResult && selectedDoc && (
+          <GlassCard className="border-indigo-500/40 bg-indigo-950/20 space-y-3 p-5 animate-fadeIn">
+            <div className="flex items-center justify-between border-b border-indigo-500/20 pb-3">
+              <div className="flex items-center space-x-2">
+                <FiCpu className="text-indigo-400 text-lg" />
+                <h3 className="text-sm font-bold text-slate-100">
+                  OpenAI Result for "{selectedDoc.title}"
+                </h3>
+              </div>
+              <button onClick={() => setAiResult(null)} className="text-xs text-slate-400 hover:text-white">
+                Dismiss
+              </button>
             </div>
-            <button onClick={() => setAiResult(null)} className="text-xs text-slate-400 hover:text-white">
-              Close
-            </button>
-          </div>
 
-          <div className="text-xs text-slate-200 space-y-2 leading-relaxed bg-slate-900/60 p-4 rounded-xl border border-white/10">
-            <p className="font-semibold text-indigo-300">
-              {aiResult.data?.shortSummary || aiResult.data?.simplifiedText}
-            </p>
-            {aiResult.data?.bulletSummary?.length > 0 && (
-              <ul className="list-disc list-inside space-y-1 text-slate-300">
-                {aiResult.data.bulletSummary.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+            {aiResult.type === 'summary' ? (
+              <div className="space-y-2 text-xs text-slate-200">
+                <p className="font-semibold text-indigo-300">Executive Summary:</p>
+                <p className="leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                  {aiResult.data.executiveSummary || aiResult.data.summary}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2 text-xs text-slate-200">
+                <p className="font-semibold text-indigo-300">Simplified Text:</p>
+                <p className="leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                  {aiResult.data.simplifiedText}
+                </p>
+              </div>
             )}
+          </GlassCard>
+        )}
+
+        {/* Vault Cards Grid */}
+        {filteredDocs.length === 0 ? (
+          <GlassCard className="text-center py-12 border-dashed border-white/15">
+            <FiFileText className="text-4xl text-slate-500 mx-auto mb-2" />
+            <h3 className="text-base font-bold text-slate-200">No Documents in Vault</h3>
+            <p className="text-xs text-slate-400 mt-1">Upload a PDF, image, URL, or paste text above to see processed document cards here.</p>
+          </GlassCard>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredDocs.map((doc) => (
+              <GlassCard key={doc.id} className="p-4 flex flex-col justify-between space-y-4 hover:border-indigo-500/40 transition-all">
+                <div className="space-y-2">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl flex-shrink-0">
+                      {doc.file_type === 'pdf' ? <FiFileText /> : doc.file_type === 'url' ? <FiGlobe /> : <FiUploadCloud />}
+                    </div>
+
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => handleToggleFavorite(doc.id)}
+                        className={`p-1.5 rounded-lg text-sm transition-colors ${
+                          doc.metadata?.favorite ? 'text-amber-400' : 'text-slate-500 hover:text-amber-400'
+                        }`}
+                        title="Toggle Favorite"
+                      >
+                        <FiStar />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(doc.id)}
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 transition-colors text-sm"
+                        title="Delete Document"
+                      >
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-100 truncate" title={doc.title}>
+                      {doc.title || doc.file_name}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5 uppercase tracking-wider">
+                      {doc.file_type || 'document'} • {doc.metadata?.wordCount || 0} words • {doc.metadata?.readingTime || '1 min'}
+                    </p>
+                  </div>
+
+                  <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed bg-slate-900/40 p-2 rounded-xl border border-white/5">
+                    {doc.extracted_text || 'No text extracted'}
+                  </p>
+                </div>
+
+                {/* Quick Actions Row */}
+                <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-1">
+                  <button
+                    onClick={() => handleOpenAiChat(doc)}
+                    className="flex-1 flex items-center justify-center space-x-1 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium transition-colors"
+                  >
+                    <FiMessageSquare /> <span>AI Chat</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSummarize(doc)}
+                    className="flex-1 flex items-center justify-center space-x-1 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 border border-purple-500/30 text-[11px] font-medium transition-colors"
+                  >
+                    <FiZap /> <span>Summarize</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleSimplify(doc)}
+                    className="flex-1 flex items-center justify-center space-x-1 py-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-300 text-[11px] font-medium transition-colors"
+                  >
+                    <FiRepeat /> <span>Simplify</span>
+                  </button>
+                </div>
+              </GlassCard>
+            ))}
           </div>
-        </GlassCard>
-      )}
+        )}
+      </div>
     </div>
   );
 };
